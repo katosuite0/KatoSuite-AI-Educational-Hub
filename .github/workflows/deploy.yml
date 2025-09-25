@@ -23,7 +23,7 @@ jobs:
 
     - name: Deploy to Vercel (Production)
       if: github.ref == 'refs/heads/main'
-      uses: vercel/vercel-action@v2
+      uses: amondnet/vercel-action@v25
       with:
         vercel-token: ${{ amg1LW4r84uFMIpORvBNhepD }}
         vercel-org-id: ${{ XoJIlcnFQ97L50nNnwEAhFsI }}
