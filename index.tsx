@@ -1,548 +1,308 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
-import { motion } from 'motion/react';
-import { 
-  Mic, 
-  Brain, 
-  Zap, 
-  Sparkles, 
-  Volume2, 
-  FileText, 
-  Users, 
-  Globe, 
-  CheckCircle, 
-  Star,
-  Play,
-  ArrowRight,
-  Headphones,
-  MessageSquare,
-  Languages,
-  Shield,
-  TrendingUp,
-  Clock
-} from 'lucide-react';
-import { Button } from '../../components/ui/button';
-import { Card } from '../../components/ui/card';
-import { Badge } from '../../components/ui/badge';
-import { VoiceAILessonGenerator } from '../../components/ai-systems/VoiceAILessonGenerator';
-import { MultiProviderAIPipeline } from '../../components/ai-systems/MultiProviderAIPipeline';
-import { useAuth } from '../../packages/utils/hooks/useAuth';
-import { usePlanContext } from '../../packages/utils/hooks/usePlanContext';
-import { checkFeatureAccess } from '../../utils/checkFeatureAccess';
-import { AdvancedSEOOptimizer } from '../../components/seo/AdvancedSEOOptimizer';
+import { useState } from 'react';
+import { useAuth } from '../../../../packages/utils/hooks/useAuth';
+import { usePlanContext } from '../../../../packages/utils/hooks/usePlanContext';
+import { Button } from '../../../../packages/design-system/components/Button';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '../../../../packages/design-system/components/Card';
+import { Lightbulb, Users, FileText, TrendingUp, Award, Globe, ArrowRight, Play } from 'lucide-react';
+import type { Language } from '../../../../packages/types';
 
-interface VoiceAIPageProps {
-  language: 'en' | 'fr';
+interface HomePageProps {
+  language: Language;
+  onAuthClick: () => void;
+  onShowDemo: () => void;
 }
 
-export function VoiceAIPage({ language }: VoiceAIPageProps) {
+export default function HomePage({ language, onAuthClick, onShowDemo }: HomePageProps) {
   const { user } = useAuth();
   const { plan } = usePlanContext();
-  const [activeTab, setActiveTab] = useState<'overview' | 'generator' | 'pipeline'>('overview');
-  const [showDemo, setShowDemo] = useState(false);
 
-  // Check feature access
-  const hasVoiceAI = checkFeatureAccess(user, plan, 'voiceAI');
-  const hasAdvancedVoice = checkFeatureAccess(user, plan, 'advancedVoice');
-  const hasBilingualVoice = checkFeatureAccess(user, plan, 'bilingualVoice');
+  const isEnglish = language === 'en';
 
-  // SEO configuration for Voice AI page
-  const seoConfig = {
-    title: language === 'fr' 
-      ? 'IA Vocale pour Éducateurs - KatoSuite | Génération de Plans de Leçons par la Voix'
-      : 'Voice AI for Educators - KatoSuite | Voice-Powered Lesson Plan Generation',
-    description: language === 'fr'
-      ? 'Révolutionnez votre enseignement avec l\'IA vocale KatoSuite. Créez des plans de leçons conformes aux cadres canadiens simplement en parlant. Technologie Deepgram + Claude AI.'
-      : 'Revolutionize your teaching with KatoSuite Voice AI. Create Canadian framework-compliant lesson plans simply by speaking. Powered by Deepgram + Claude AI.',
-    keywords: language === 'fr'
-      ? 'IA vocale éducation, plans de leçons voix, éducateurs Canada, HDLH Ontario, Flight Alberta, technologie éducative, reconnaissance vocale'
-      : 'voice AI education, voice lesson plans, Canadian educators, HDLH Ontario, Flight Alberta, educational technology, speech recognition',
-    ogImage: '/images/voice-ai-hero.jpg',
-    canonicalUrl: '/voice-ai'
+  const heroContent = {
+    en: {
+      title: "AI-Powered Lesson Plans for Early Childhood Educators",
+      subtitle: "Create curriculum-aligned, bilingual lesson plans in minutes. Trusted by educators across Canada and the United States.",
+      cta: "Start Free Trial",
+      demo: "Watch Demo",
+      features: [
+        "HDLH & Flight Framework Compliant",
+        "English & French Bilingual Support", 
+        "Child Development Tracking",
+        "Compliance Reporting Ready"
+      ]
+    },
+    fr: {
+      title: "Plans de Leçon IA pour Éducateurs de la Petite Enfance",
+      subtitle: "Créez des plans de leçon bilingues alignés sur les programmes en quelques minutes. Utilisé par les éducateurs au Canada et aux États-Unis.",
+      cta: "Commencer l'Essai Gratuit",
+      demo: "Voir la Démo",
+      features: [
+        "Conforme aux Cadres HDLH et Flight",
+        "Support Bilingue Anglais et Français",
+        "Suivi du Développement de l'Enfant", 
+        "Rapports de Conformité Prêts"
+      ]
+    }
   };
 
-  // Demo statistics
-  const demoStats = [
-    {
-      icon: Clock,
-      value: '< 3s',
-      label: language === 'fr' ? 'Temps de réponse' : 'Response Time',
-      color: 'text-green-600'
-    },
-    {
-      icon: CheckCircle,
-      value: '98.5%',
-      label: language === 'fr' ? 'Précision' : 'Accuracy',
-      color: 'text-blue-600'
-    },
-    {
-      icon: Languages,
-      value: '2',
-      label: language === 'fr' ? 'Langues' : 'Languages',
-      color: 'text-purple-600'
-    },
-    {
-      icon: Shield,
-      value: '100%',
-      label: language === 'fr' ? 'Conformité' : 'Compliance',
-      color: 'text-orange-600'
-    }
-  ];
-
-  // Feature highlights
-  const features = [
-    {
-      icon: Mic,
-      title: language === 'fr' ? 'Reconnaissance Vocale Avancée' : 'Advanced Speech Recognition',
-      description: language === 'fr' 
-        ? 'Technologie Deepgram de pointe pour une transcription précise en français et anglais'
-        : 'Cutting-edge Deepgram technology for accurate transcription in French and English',
-      premium: false
-    },
-    {
-      icon: Brain,
-      title: language === 'fr' ? 'IA Multi-Fournisseurs' : 'Multi-Provider AI',
-      description: language === 'fr'
-        ? 'Claude AI principal avec basculement automatique vers GPT-4 pour une fiabilité maximale'
-        : 'Primary Claude AI with automatic GPT-4 fallover for maximum reliability',
-      premium: true
-    },
-    {
-      icon: Globe,
-      title: language === 'fr' ? 'Conformité Cadres Canadiens' : 'Canadian Framework Compliance',
-      description: language === 'fr'
-        ? 'Validation automatique HDLH, Flight, ELOF et Accueillir en temps réel'
-        : 'Automatic HDLH, Flight, ELOF and Accueillir validation in real-time',
-      premium: false
-    },
-    {
-      icon: FileText,
-      title: language === 'fr' ? 'Génération Instantanée' : 'Instant Generation',
-      description: language === 'fr'
-        ? 'Plans de leçons complets générés en moins de 3 secondes avec scoring qualité'
-        : 'Complete lesson plans generated in under 3 seconds with quality scoring',
-      premium: true
-    },
-    {
-      icon: Languages,
-      title: language === 'fr' ? 'Mode Bilingue Intelligent' : 'Smart Bilingual Mode',
-      description: language === 'fr'
-        ? 'Génération automatique de contenu bilingue adapté aux besoins québécois'
-        : 'Automatic bilingual content generation adapted to Quebec needs',
-      premium: true
-    },
-    {
-      icon: TrendingUp,
-      title: language === 'fr' ? 'Analyse de Performance' : 'Performance Analytics',
-      description: language === 'fr'
-        ? 'Suivi en temps réel de l\'utilisation et optimisation des coûts IA'
-        : 'Real-time usage tracking and AI cost optimization',
-      premium: true
-    }
-  ];
-
-  // Voice command examples
-  const voiceExamples = [
-    {
-      category: language === 'fr' ? 'Développement Moteur' : 'Motor Development',
-      examples: [
-        language === 'fr' 
-          ? "Créer une activité de motricité fine pour les 3-4 ans avec des ciseaux"
-          : "Create a fine motor activity for 3-4 year olds using scissors",
-        language === 'fr'
-          ? "Plan d'activité physique extérieure pour développer l'équilibre"
-          : "Outdoor physical activity plan to develop balance"
-      ]
-    },
-    {
-      category: language === 'fr' ? 'Apprentissage Cognitif' : 'Cognitive Learning',
-      examples: [
-        language === 'fr'
-          ? "Leçon de mathématiques sur le comptage jusqu'à 10 avec manipulatifs"
-          : "Math lesson on counting to 10 with manipulatives",
-        language === 'fr'
-          ? "Activité de résolution de problèmes pour préscolaires"
-          : "Problem-solving activity for preschoolers"
-      ]
-    },
-    {
-      category: language === 'fr' ? 'Développement Social' : 'Social Development',
-      examples: [
-        language === 'fr'
-          ? "Jeu coopératif pour apprendre à partager et à tour de rôle"
-          : "Cooperative game to learn sharing and turn-taking",
-        language === 'fr'
-          ? "Activité de gestion des émotions avec livres d'images"
-          : "Emotion management activity with picture books"
-      ]
-    }
-  ];
-
-  // Render hero section
-  const renderHeroSection = () => (
-    <div className="hero-gradient-bg py-20">
-      <div className="container-kato text-center space-y-8">
-        <motion.div
-          initial={{ opacity: 0, y: 30 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.6 }}
-          className="space-y-4"
-        >
-          <Badge className="bg-purple-100 text-purple-700 px-4 py-2 text-sm font-medium">
-            <Sparkles className="w-4 h-4 mr-2" />
-            {language === 'fr' ? 'Technologie Révolutionnaire' : 'Revolutionary Technology'}
-          </Badge>
-          
-          <h1 className="text-4xl md:text-6xl font-bold gradient-text-main leading-tight">
-            {language === 'fr' 
-              ? 'IA Vocale pour Éducateurs'
-              : 'Voice AI for Educators'
-            }
-          </h1>
-          
-          <p className="text-xl md:text-2xl text-muted-foreground max-w-3xl mx-auto leading-relaxed">
-            {language === 'fr'
-              ? 'Créez des plans de leçons conformes aux cadres canadiens simplement en parlant. Technologie de pointe avec Deepgram et Claude AI.'
-              : 'Create Canadian framework-compliant lesson plans simply by speaking. Powered by cutting-edge Deepgram and Claude AI technology.'
-            }
-          </p>
-        </motion.div>
-
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.6, delay: 0.2 }}
-          className="grid grid-cols-2 md:grid-cols-4 gap-6 max-w-2xl mx-auto"
-        >
-          {demoStats.map((stat, index) => (
-            <div key={index} className="text-center">
-              <div className={`text-2xl md:text-3xl font-bold ${stat.color}`}>
-                {stat.value}
-              </div>
-              <div className="text-sm text-muted-foreground mt-1">
-                {stat.label}
-              </div>
-            </div>
-          ))}
-        </motion.div>
-
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.6, delay: 0.4 }}
-          className="flex flex-col sm:flex-row gap-4 justify-center items-center"
-        >
-          <Button 
-            size="lg" 
-            className="btn-kato-large"
-            onClick={() => setActiveTab('generator')}
-          >
-            <Mic className="w-5 h-5 mr-2" />
-            {language === 'fr' ? 'Essayer Maintenant' : 'Try Now'}
-          </Button>
-          
-          <Button 
-            size="lg" 
-            variant="outline"
-            onClick={() => setShowDemo(true)}
-          >
-            <Play className="w-5 h-5 mr-2" />
-            {language === 'fr' ? 'Voir la Démo' : 'Watch Demo'}
-          </Button>
-        </motion.div>
-      </div>
-    </div>
-  );
-
-  // Render features section
-  const renderFeaturesSection = () => (
-    <section className="section-kato">
-      <div className="container-kato">
-        <div className="text-center mb-12">
-          <h2 className="text-3xl md:text-4xl font-bold mb-4">
-            {language === 'fr' 
-              ? 'Fonctionnalités Révolutionnaires'
-              : 'Revolutionary Features'
-            }
-          </h2>
-          <p className="text-xl text-muted-foreground max-w-2xl mx-auto">
-            {language === 'fr'
-              ? 'Une technologie de pointe conçue spécifiquement pour les éducateurs canadiens'
-              : 'Cutting-edge technology designed specifically for Canadian educators'
-            }
-          </p>
-        </div>
-
-        <div className="grid-kato-3">
-          {features.map((feature, index) => (
-            <motion.div
-              key={index}
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.6, delay: index * 0.1 }}
-            >
-              <Card className="edu-card-hover h-full">
-                <div className="space-y-4">
-                  <div className="flex items-center gap-3">
-                    <div className="p-3 bg-gradient-to-br from-purple-blue to-orange rounded-xl">
-                      <feature.icon className="w-6 h-6 text-white" />
-                    </div>
-                    {feature.premium && (
-                      <Badge className="bg-orange-100 text-orange-700">
-                        {language === 'fr' ? 'Pro+' : 'Pro+'}
-                      </Badge>
-                    )}
-                  </div>
-                  
-                  <div>
-                    <h3 className="text-lg font-semibold mb-2">{feature.title}</h3>
-                    <p className="text-muted-foreground leading-relaxed">
-                      {feature.description}
-                    </p>
-                  </div>
-                </div>
-              </Card>
-            </motion.div>
-          ))}
-        </div>
-      </div>
-    </section>
-  );
-
-  // Render voice examples section
-  const renderVoiceExamplesSection = () => (
-    <section className="section-kato bg-gray-50">
-      <div className="container-kato">
-        <div className="text-center mb-12">
-          <h2 className="text-3xl md:text-4xl font-bold mb-4">
-            {language === 'fr' 
-              ? 'Exemples de Commandes Vocales'
-              : 'Voice Command Examples'
-            }
-          </h2>
-          <p className="text-xl text-muted-foreground max-w-2xl mx-auto">
-            {language === 'fr'
-              ? 'Parlez naturellement pour créer des plans de leçons personnalisés'
-              : 'Speak naturally to create personalized lesson plans'
-            }
-          </p>
-        </div>
-
-        <div className="grid-kato-3 mb-8">
-          {voiceExamples.map((category, index) => (
-            <Card key={index} className="p-6">
-              <div className="space-y-4">
-                <div className="flex items-center gap-2">
-                  <MessageSquare className="w-5 h-5 text-purple-blue" />
-                  <h3 className="text-lg font-semibold">{category.category}</h3>
-                </div>
-                
-                <div className="space-y-3">
-                  {category.examples.map((example, exIndex) => (
-                    <div key={exIndex} className="p-3 bg-gray-50 rounded-lg">
-                      <div className="flex items-start gap-2">
-                        <Mic className="w-4 h-4 text-muted-foreground mt-1 flex-shrink-0" />
-                        <p className="text-sm italic">"{example}"</p>
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              </div>
-            </Card>
-          ))}
-        </div>
-
-        <div className="text-center">
-          <Button 
-            size="lg" 
-            onClick={() => setActiveTab('generator')}
-            className="btn-kato-primary"
-          >
-            <Headphones className="w-5 h-5 mr-2" />
-            {language === 'fr' ? 'Commencer à Parler' : 'Start Speaking'}
-            <ArrowRight className="w-5 h-5 ml-2" />
-          </Button>
-        </div>
-      </div>
-    </section>
-  );
-
-  // Render main content based on active tab
-  const renderMainContent = () => {
-    switch (activeTab) {
-      case 'generator':
-        return (
-          <section className="section-kato">
-            <div className="container-kato">
-              <VoiceAILessonGenerator
-                language={language}
-                onUpgradeNeeded={() => {
-                  // Handle upgrade needed
-                  console.log('Upgrade needed for voice AI');
-                }}
-                onLessonGenerated={(lesson) => {
-                  console.log('Lesson generated:', lesson);
-                }}
-              />
-            </div>
-          </section>
-        );
-      
-      case 'pipeline':
-        return (
-          <section className="section-kato">
-            <div className="container-kato">
-              <MultiProviderAIPipeline
-                language={language}
-                onSettingsChange={(settings) => {
-                  console.log('Settings changed:', settings);
-                }}
-              />
-            </div>
-          </section>
-        );
-      
-      default:
-        return (
-          <>
-            {renderFeaturesSection()}
-            {renderVoiceExamplesSection()}
-          </>
-        );
-    }
-  };
+  const content = heroContent[language];
 
   return (
-    <div className="min-h-screen bg-background">
-      {/* SEO Optimization */}
-      <AdvancedSEOOptimizer 
-        {...seoConfig}
-        language={language}
-        structuredData={{
-          "@context": "https://schema.org",
-          "@type": "SoftwareApplication",
-          "name": "KatoSuite Voice AI",
-          "description": seoConfig.description,
-          "applicationCategory": "Educational Software",
-          "operatingSystem": "Web Browser",
-          "offers": {
-            "@type": "Offer",
-            "price": "19.99",
-            "priceCurrency": "CAD"
-          },
-          "featureList": [
-            "Voice-powered lesson planning",
-            "Multi-language support",
-            "Canadian framework compliance",
-            "Real-time transcription",
-            "AI-powered content generation"
-          ]
-        }}
-      />
-
-      {/* Navigation Tabs */}
-      <div className="sticky top-16 z-30 bg-white border-b border-border">
+    <>
+      {/* Hero Section */}
+      <section className="hero-section">
         <div className="container-kato">
-          <div className="flex items-center gap-1 py-3">
-            <Button
-              variant={activeTab === 'overview' ? 'default' : 'ghost'}
-              onClick={() => setActiveTab('overview')}
-              className="flex items-center gap-2"
-            >
-              <Star className="w-4 h-4" />
-              {language === 'fr' ? 'Aperçu' : 'Overview'}
-            </Button>
+          <div className="text-center max-w-4xl mx-auto">
+            <div className="flex items-center justify-center mb-8">
+              <Lightbulb className="lightbulb-logo-large mr-4" />
+              <span className="text-4xl font-inter font-bold gradient-text-main">
+                KatoSuite
+              </span>
+            </div>
             
-            <Button
-              variant={activeTab === 'generator' ? 'default' : 'ghost'}
-              onClick={() => setActiveTab('generator')}
-              className="flex items-center gap-2"
-              disabled={!hasVoiceAI}
-            >
-              <Mic className="w-4 h-4" />
-              {language === 'fr' ? 'Générateur' : 'Generator'}
-              {!hasVoiceAI && (
-                <Badge variant="outline" className="ml-2 text-xs">
-                  Pro+
-                </Badge>
-              )}
-            </Button>
+            <h1 className="text-heading mb-6">
+              {content.title}
+            </h1>
             
-            <Button
-              variant={activeTab === 'pipeline' ? 'default' : 'ghost'}
-              onClick={() => setActiveTab('pipeline')}
-              className="flex items-center gap-2"
-              disabled={!hasAdvancedVoice}
-            >
-              <Brain className="w-4 h-4" />
-              {language === 'fr' ? 'Pipeline IA' : 'AI Pipeline'}
-              {!hasAdvancedVoice && (
-                <Badge variant="outline" className="ml-2 text-xs">
-                  Deluxe
-                </Badge>
-              )}
-            </Button>
+            <p className="text-xl text-muted-foreground mb-8 max-w-3xl mx-auto">
+              {content.subtitle}
+            </p>
+
+            <div className="flex flex-col sm:flex-row gap-4 justify-center mb-12">
+              <Button
+                variant="primary"
+                size="lg"
+                onClick={user ? () => window.location.href = '/dashboard' : onAuthClick}
+                className="btn-kato-large"
+                icon={<ArrowRight className="h-5 w-5" />}
+              >
+                {content.cta}
+              </Button>
+              
+              <Button
+                variant="outline"
+                size="lg"
+                onClick={onShowDemo}
+                icon={<Play className="h-5 w-5" />}
+              >
+                {content.demo}
+              </Button>
+            </div>
+
+            {/* Feature Pills */}
+            <div className="flex flex-wrap gap-3 justify-center">
+              {content.features.map((feature, index) => (
+                <div
+                  key={index}
+                  className="bg-accent text-accent-foreground px-4 py-2 rounded-full text-sm font-medium"
+                >
+                  {feature}
+                </div>
+              ))}
+            </div>
           </div>
         </div>
-      </div>
+      </section>
 
-      {/* Hero Section (only show on overview) */}
-      {activeTab === 'overview' && renderHeroSection()}
-
-      {/* Main Content */}
-      {renderMainContent()}
-
-      {/* CTA Section (only show on overview) */}
-      {activeTab === 'overview' && (
-        <section className="section-kato bg-gradient-to-br from-purple-blue to-orange text-white">
-          <div className="container-kato text-center">
-            <motion.div
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.6 }}
-              className="space-y-6"
-            >
-              <h2 className="text-3xl md:text-4xl font-bold">
-                {language === 'fr' 
-                  ? 'Prêt à Révolutionner Votre Enseignement ?'
-                  : 'Ready to Revolutionize Your Teaching?'
-                }
-              </h2>
-              
-              <p className="text-xl opacity-90 max-w-2xl mx-auto">
-                {language === 'fr'
-                  ? 'Rejoignez des milliers d\'éducateurs canadiens qui utilisent déjà l\'IA vocale pour créer des plans de leçons exceptionnels.'
-                  : 'Join thousands of Canadian educators already using voice AI to create exceptional lesson plans.'
-                }
-              </p>
-              
-              <div className="flex flex-col sm:flex-row gap-4 justify-center">
-                <Button 
-                  size="lg" 
-                  variant="secondary"
-                  className="bg-white text-purple-blue hover:bg-gray-100"
-                  onClick={() => setActiveTab('generator')}
-                >
-                  <Zap className="w-5 h-5 mr-2" />
-                  {language === 'fr' ? 'Essayer Gratuitement' : 'Try Free'}
-                </Button>
-                
-                <Button 
-                  size="lg" 
-                  variant="outline"
-                  className="border-white text-white hover:bg-white hover:text-purple-blue"
-                >
-                  <Users className="w-5 h-5 mr-2" />
-                  {language === 'fr' ? 'Voir les Plans' : 'View Plans'}
-                </Button>
-              </div>
-            </motion.div>
+      {/* Features Section */}
+      <section className="section-kato">
+        <div className="container-kato">
+          <div className="text-center mb-16">
+            <h2 className="text-heading mb-6">
+              {isEnglish ? 'Everything You Need for Excellence in Early Childhood Education' : 'Tout ce dont vous avez besoin pour l\'excellence en éducation de la petite enfance'}
+            </h2>
+            <p className="text-xl text-muted-foreground max-w-3xl mx-auto">
+              {isEnglish 
+                ? 'Comprehensive tools designed specifically for Canadian and US early childhood education frameworks.'
+                : 'Outils complets conçus spécifiquement pour les cadres d\'éducation de la petite enfance canadiens et américains.'
+              }
+            </p>
           </div>
-        </section>
-      )}
-    </div>
+
+          <div className="grid-kato-3">
+            <Card variant="feature" hover className="text-center">
+              <CardHeader>
+                <FileText className="h-12 w-12 text-btn-indigo mx-auto mb-4" />
+                <CardTitle>
+                  {isEnglish ? 'AI Lesson Generator' : 'Générateur de Leçons IA'}
+                </CardTitle>
+                <CardDescription>
+                  {isEnglish 
+                    ? 'Create comprehensive lesson plans aligned with HDLH, Flight, and ELOF frameworks in minutes.'
+                    : 'Créez des plans de leçon complets alignés sur les cadres HDLH, Flight et ELOF en quelques minutes.'
+                  }
+                </CardDescription>
+              </CardHeader>
+            </Card>
+
+            <Card variant="feature" hover className="text-center">
+              <CardHeader>
+                <Users className="h-12 w-12 text-btn-mint mx-auto mb-4" />
+                <CardTitle>
+                  {isEnglish ? 'Child Development Tracking' : 'Suivi du Développement de l\'Enfant'}
+                </CardTitle>
+                <CardDescription>
+                  {isEnglish 
+                    ? 'Monitor and document child progress with milestone tracking and observation tools.'
+                    : 'Surveillez et documentez le progrès des enfants avec des outils de suivi des étapes et d\'observation.'
+                  }
+                </CardDescription>
+              </CardHeader>
+            </Card>
+
+            <Card variant="feature" hover className="text-center">
+              <CardHeader>
+                <Award className="h-12 w-12 text-btn-coral mx-auto mb-4" />
+                <CardTitle>
+                  {isEnglish ? 'Compliance Reporting' : 'Rapports de Conformité'}
+                </CardTitle>
+                <CardDescription>
+                  {isEnglish 
+                    ? 'Generate professional reports that meet regulatory requirements and licensing standards.'
+                    : 'Générez des rapports professionnels qui répondent aux exigences réglementaires et aux normes de licence.'
+                  }
+                </CardDescription>
+              </CardHeader>
+            </Card>
+
+            <Card variant="feature" hover className="text-center">
+              <CardHeader>
+                <Globe className="h-12 w-12 text-btn-yellow mx-auto mb-4" />
+                <CardTitle>
+                  {isEnglish ? 'Bilingual Support' : 'Support Bilingue'}
+                </CardTitle>
+                <CardDescription>
+                  {isEnglish 
+                    ? 'Full English and French language support for Canadian bilingual education requirements.'
+                    : 'Support complet en anglais et en français pour les exigences d\'éducation bilingue canadienne.'
+                  }
+                </CardDescription>
+              </CardHeader>
+            </Card>
+
+            <Card variant="feature" hover className="text-center">
+              <CardHeader>
+                <TrendingUp className="h-12 w-12 text-btn-indigo mx-auto mb-4" />
+                <CardTitle>
+                  {isEnglish ? 'Analytics & Insights' : 'Analyses et Aperçus'}
+                </CardTitle>
+                <CardDescription>
+                  {isEnglish 
+                    ? 'Track classroom performance and identify learning opportunities with detailed analytics.'
+                    : 'Suivez les performances de la classe et identifiez les opportunités d\'apprentissage avec des analyses détaillées.'
+                  }
+                </CardDescription>
+              </CardHeader>
+            </Card>
+
+            <Card variant="feature" hover className="text-center">
+              <CardHeader>
+                <Lightbulb className="h-12 w-12 text-btn-mint mx-auto mb-4" />
+                <CardTitle>
+                  {isEnglish ? 'Smart Templates' : 'Modèles Intelligents'}
+                </CardTitle>
+                <CardDescription>
+                  {isEnglish 
+                    ? 'Access hundreds of pre-built templates and activities tailored to different age groups.'
+                    : 'Accédez à des centaines de modèles et d\'activités pré-construits adaptés aux différents groupes d\'âge.'
+                  }
+                </CardDescription>
+              </CardHeader>
+            </Card>
+          </div>
+        </div>
+      </section>
+
+      {/* Framework Support Section */}
+      <section className="section-kato bg-accent/30">
+        <div className="container-kato">
+          <div className="text-center mb-16">
+            <h2 className="text-heading mb-6">
+              {isEnglish ? 'Trusted Framework Support' : 'Support de Cadre de Confiance'}
+            </h2>
+            <p className="text-xl text-muted-foreground max-w-3xl mx-auto">
+              {isEnglish 
+                ? 'Built specifically for Canadian and US early childhood education standards.'
+                : 'Conçu spécifiquement pour les normes d\'éducation de la petite enfance canadiennes et américaines.'
+              }
+            </p>
+          </div>
+
+          <div className="grid-kato-2 max-w-4xl mx-auto">
+            <Card className="text-center p-8">
+              <CardHeader>
+                <div className="text-4xl mb-4">🇨🇦</div>
+                <CardTitle>Canada</CardTitle>
+                <CardDescription>
+                  {isEnglish 
+                    ? 'HDLH (How Does Learning Happen?), Flight Framework, and Accueillir la petite enfance'
+                    : 'HDLH (Comment l\'apprentissage se déroule-t-il ?), Cadre Flight, et Accueillir la petite enfance'
+                  }
+                </CardDescription>
+              </CardHeader>
+            </Card>
+
+            <Card className="text-center p-8">
+              <CardHeader>
+                <div className="text-4xl mb-4">🇺🇸</div>
+                <CardTitle>United States</CardTitle>
+                <CardDescription>
+                  {isEnglish 
+                    ? 'Early Learning and Development Guidelines (ELDG) and Head Start Early Learning Outcomes Framework (ELOF)'
+                    : 'Directives d\'apprentissage et de développement précoce (ELDG) et Cadre des résultats d\'apprentissage précoce Head Start (ELOF)'
+                  }
+                </CardDescription>
+              </CardHeader>
+            </Card>
+          </div>
+        </div>
+      </section>
+
+      {/* CTA Section */}
+      <section className="section-kato">
+        <div className="container-kato">
+          <div className="text-center max-w-3xl mx-auto">
+            <h2 className="text-heading mb-6">
+              {isEnglish ? 'Ready to Transform Your Teaching?' : 'Prêt à Transformer Votre Enseignement?'}
+            </h2>
+            <p className="text-xl text-muted-foreground mb-8">
+              {isEnglish 
+                ? 'Join thousands of educators who trust KatoSuite for their lesson planning and child development needs.'
+                : 'Rejoignez des milliers d\'éducateurs qui font confiance à KatoSuite pour leurs besoins de planification de leçons et de développement de l\'enfant.'
+              }
+            </p>
+            
+            <div className="flex flex-col sm:flex-row gap-4 justify-center">
+              <Button
+                variant="primary"
+                size="lg"
+                onClick={user ? () => window.location.href = '/dashboard' : onAuthClick}
+                className="btn-kato-large"
+                icon={<ArrowRight className="h-5 w-5" />}
+              >
+                {content.cta}
+              </Button>
+              
+              <Button
+                variant="outline"
+                size="lg"
+                onClick={() => window.location.href = '/pricing'}
+              >
+                {isEnglish ? 'View Pricing' : 'Voir la Tarification'}
+              </Button>
+            </div>
+
+            <p className="text-sm text-muted-foreground mt-4">
+              {isEnglish 
+                ? 'Free trial • No credit card required • Cancel anytime'
+                : 'Essai gratuit • Aucune carte de crédit requise • Annulez à tout moment'
+              }
+            </p>
+          </div>
+        </div>
+      </section>
+    </>
   );
 }
-
-export default VoiceAIPage;
