@@ -21,10 +21,7 @@ const nextConfig = {
       },
     ]
   },
-  reactStrictMode: true,
-  experimental: {
-    appDir: true
-  }
+  reactStrictMode: true
 };
 
 module.exports = nextConfig;
